@@ -1,0 +1,27 @@
+- name: register repository
+  yum:
+    name: http://dev.mysql.com/get/mysql57-community-release-el7-8.noarch.rpm
+    state: present
+
+- name: install mysql
+  yum:
+    name: "{{ item }}"
+    enablerepo: mysql57-community
+    disablerepo: mysql56-community
+    state: present
+  with_items:
+    - mysql-community-server
+
+- name: set start mysqld automaticaly
+  service:
+    name: mysqld
+    state: started
+    enabled: yes
+
+- name: confirm default setting (by mysqladmin ping)
+  shell: "mysqladmin --defaults-file={{ mysql_5_7_defaults_file}} ping | grep alive"
+  ignore_errors: true
+  register: mysql_not_setup
+
+- include_tasks: set_up_mysql.yml
+  when: mysql_not_setup.rc == 1

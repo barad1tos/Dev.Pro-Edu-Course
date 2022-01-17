@@ -1,0 +1,22 @@
+- name: Install php{{ php_ver }}
+  shell: "amazon-linux-extras install php{{ php_ver }} -y"
+  become: yes
+- name: Install php and modules
+  yum:
+    name:
+      - php-fpm
+      - php-common
+      - php-pdo
+      - php-mbstring
+      - php-xml
+      - php-gd
+    state: present
+  become: yes
+
+- name: ensure php-fpm is running
+    service:
+      name: php-fpm
+      state: started
+      notify:
+       - restart php-fpm 
+       - restart nginx
