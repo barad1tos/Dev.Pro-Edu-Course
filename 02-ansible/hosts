@@ -1,0 +1,2 @@
+[lemp]
+ec2_server ansible_host=3.137.200.84

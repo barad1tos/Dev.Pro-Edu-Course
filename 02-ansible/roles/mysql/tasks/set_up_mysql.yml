@@ -1,0 +1,69 @@
+- name: install mysql module for ansible
+  yum:
+    name: MySQL-python
+
+- name: create temporary .my.cnf
+  shell: sudo cat /var/log/mysqld.log | grep 'temporary password' | awk 'NR>0 {print $11}' | sudo xargs -i{} echo -e "[client]\nuser = root\npassword = \"{}\"\n\n[mysql]\nconnect-expired-password\n\n[mysqladmin]\nuser = root\npassword = \"{}\"" > /root/.my.cnf
+
+- name: cnahge password for root user 1
+  shell: mysql --defaults-file=/root/.my.cnf -e "ALTER USER 'root'@'localhost' IDENTIFIED BY  '{{ mysql_5_7_root_password }}' "
+
+- name: create setting file to connect mysql for root user
+  template:
+    src: .my.cnf.j2
+    dest: "{{ mysql_5_7_defaults_file }}"
+    owner: root
+    group: root
+    mode: 0600
+
+- name: change password for root user 2
+  mysql_user:
+    name: "root"
+    host: "{{ item }}"
+    password: "{{ mysql_5_7_root_password }}"
+  with_items:
+    - 127.0.0.1
+    - ::1
+    - localhost.localdomain
+    - localhost
+
+- name: delete anonymous user
+  mysql_user:
+    name: ""
+    host: "{{ item }}"
+    state: absent
+  with_items:
+    - localhost.localdomain
+    - localhost
+
+- name: set database for application
+  mysql_db:
+    name: "{{ mysql_5_7_database_name }}"
+    encoding: utf8
+  when: mysql_5_7_database_name is defined
+
+- name: create no root user
+  mysql_user:
+    name: "{{ mysql_5_7_user_name }}"
+    host: "{{ item }}"
+    password: "{{ mysql_5_7_user_password }}"
+    priv: "{{ mysql_5_7_database_name }}.*:ALL,GRANT,REQUIRESSL"
+  with_items:
+    - "{{ mysql_5_7_user_host if mysql_5_7_user_host is defined else '%' }}"
+    - 127.0.0.1
+    - ::1
+    - localhost.localdomain
+    - localhost
+  when: mysql_5_7_user_name is defined and mysql_5_7_user_password is defined
+
+- name: set ssl settings and strict mode
+  blockinfile:
+    path: /etc/my.cnf
+    insertafter: "\\[mysqld\\]$"
+    block: |
+      ssl-ca = /etc/pki/CA/cacert.pem
+      ssl-cert = /etc/pki/tls/certs/servercert.pem
+      ssl-key = /etc/pki/tls/private/serverkey.pem
+      sql_mode = TRADITIONAL,NO_AUTO_VALUE_ON_ZERO,ONLY_FULL_GROUP_BY
+    marker: "# {mark} ANSIBLE MANAGED BLOCK SSL SETTING"
+  notify: restart mysql

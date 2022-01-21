@@ -1,0 +1,7 @@
+roles:
+ - nginx
+ - php
+ - phpmyadmin
+ - mysql
+
+mysql_ver: 5.7

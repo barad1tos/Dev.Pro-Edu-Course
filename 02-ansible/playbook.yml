@@ -1,0 +1,20 @@
+- name: LEMP setup
+  hosts: all
+  gather_facts: true
+  become: yes
+  tasks:
+    - name: web_servers
+      include_role:
+        name: "{{ role }}"
+      with_items: "{{ roles }}"
+      loop_control:
+        loop_var: role
+      when: ('web_roles' in group_names)
+
+    - name: db_servers
+      include_role:
+        name: "{{ role }}"
+      with_items: "{{ roles }}"
+      loop_control:
+        loop_var: role
+      when: ('db_roles' in group_names)

@@ -1,0 +1,11 @@
+- name: Install software
+  apt:
+    state: latest
+    name:
+      - phpmyadmin
+
+- name: Create symb link for phpmyadm
+  file:
+      src: /usr/share/phpmyadmin
+      dest: /var/www/html/phpmyadmin
+      state: link
