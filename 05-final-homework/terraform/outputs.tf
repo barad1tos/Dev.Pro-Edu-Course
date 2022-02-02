@@ -10,31 +10,6 @@ output "vpc_id" {
   value       = module.networking.vpc_id
 }
 
-/*
-output "sg_public_id" {
-  value       = module.networking.sg_public_id
-}
-
-output "sg_private_id" {
-  value       = module.networking.sg_private_id
-}
-
-output "sg_database_id" {
-  value       = module.networking.sg_database_id
-}
-
-output "public_subnet_ids" {
-  value       = module.networking.public_subnet_ids[*]
-}
-
-output "private_subnet_ids" {
-  value       = module.networking.private_subnet_ids[*]
-}
-
-output "database_subnet_ids" {
-  value       = module.networking.database_subnet_ids[*]
-}
-*/
 output "nat_gateway_ip" {
   value       = module.networking.nat_gateway_ip
 }
