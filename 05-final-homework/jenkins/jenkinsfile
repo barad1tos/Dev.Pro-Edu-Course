@@ -1,0 +1,26 @@
+pipeline {
+     agent any
+     environment {
+        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+        AWS_DEFAULT_REGION    = "us-east-2"
+     }
+     stages {
+
+         stage('Clone') {
+             steps {
+                 git branch: 'Dev.Pro-Edu-Course', url: 'https://github.com/barad1tos/Dev.Pro-Edu-Course.git'
+             }
+         }
+
+         stage('Terraform start') {
+             steps {
+                 dir('05-final-homework/terraform/') {
+                     sh ('terraform init')
+                     echo 'Terraform action is --> ${choose}'
+                     sh ('terraform ${choose} --auto-approve')
+                 }
+             }
+         }
+     }
+ }
